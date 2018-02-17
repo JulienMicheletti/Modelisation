@@ -87,7 +87,6 @@ public class SeamCarving {
 				count++;
 			}
 		}
-		graph.writeFile("graph.dot");
 		return graph;
 	}
 
@@ -181,36 +180,17 @@ public class SeamCarving {
 		long debut = System.currentTimeMillis();
 		int image[][] = readpgm("ex3.pgm");
 		int itr[][] = interest(image);
-		//Graph g = tograph(itr);
-		//ArrayList<Edge> chemin = djikstra(g, 0, g.vertices() - 1);
-		//int newTab[][] = supprChemin(test, chemin);
-
-		/**for (int i = 0; i < newTab.length; i++){
-			for (int j = 0; j < newTab[0].length; j++){
-				System.out.print(newTab[i][j] + " ");
-			}
-			System.out.println("\n");
-		}**/
-		Graph g;// = tograph(itr);
-		ArrayList<Edge> chemin; //= djikstra(g, 0, g.vertices() - 1);
-		//int newTab[][] = supprChemin(image, chemin);
+		Graph g;
+		ArrayList<Edge> chemin;
 		int i = 0;
 		while (i < 50){
 			g = tograph(itr);
 			chemin = djikstra(g, 0, g.vertices() - 1);
-			//System.out.println(System.currentTimeMillis()-debut2);
 			image = supprChemin(image, chemin);
 			itr = interest(image);
 			i++;
 		}
 		writepgm(image, "TestFinal2");
 		System.out.println(System.currentTimeMillis()-debut);
-		/**while (i <= 50){
-		 System.out.println(i);
-		 ArrayList<Edge> chemin = djikstra(g, 0, 13);
-		 int newTab[][] = supprChemin(itr, chemin);
-		 g = tograph(newTab);
-		 i++;
-		 }**/
 	}
 }
