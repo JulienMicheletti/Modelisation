@@ -12,4 +12,16 @@ class Edge
         this.cost = cost;
     }
 
+    public void setEdge(int cost){
+        this.cost = cost;
+    }
+
+    public void setFrom(int from){
+        this.from = from;
+    }
+
+    public void setTo(int to){
+        this.to = to;
+    }
+
 }

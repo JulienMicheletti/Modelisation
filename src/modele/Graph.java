@@ -19,6 +19,17 @@ public class Graph
 		
 	 }
 
+	 public Graph(Graph g){
+		 this.V = g.V;
+		 this.E = g.E;
+		 this.adj = g.adj;
+	 }
+
+
+	 public int getEdge(){
+		return adj.length;
+}
+
    public int vertices()
 	 {
 		return V;
