@@ -205,10 +205,10 @@ public class SeamCarving {
 		int from;
 		int to;
 
-		 /*while (iterator.hasNext()) {
+		 while (iterator.hasNext()) {
 		 	Edge e = iterator.next();
 			arretes.add(e);
-		}*/
+		}
 
 		cout[0] = 0;
 		for (int i = 1; i < g.vertices(); i++) {
