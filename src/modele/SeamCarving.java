@@ -206,17 +206,12 @@ public class SeamCarving {
 		}
 		chemin2.removeAll(poubellech2);
 
-
-		System.out.println(tab.length);
 		for (int i = 0; i < hauteur; i++) {
 			y = 0;
 			Edge act = chemin.get(index);
 			Edge act2 = chemin2.get(index);
-			//System.out.println(act.from + " " + act.to);
-			//System.out.println(act.from + " " + act2.from + " " + total + " " + a);
 			for (int j = 0; j < largeur; j++) {
 				if (act.from != total && act2.from != total) {
-					//System.out.println(tab[i][j]);
 					newTab[i][y] = tab[i][j];
 					y++;
 				}
@@ -390,7 +385,6 @@ public class SeamCarving {
 				}
 			}
 		}
-		//g.writeFile("test");
 		//Comparator<Edge> comparator = Comparator.comparing(Edge::getFrom);
 		Collections.sort(chemin, comparator);
 		Collections.sort(chemin2, comparator);
@@ -407,23 +401,21 @@ public class SeamCarving {
 		ArrayList<Edge> chemin;
 		ArrayList<Edge> chemin2;
 		int test[][] = {{3, 11, 29, 9}, {8, 21, 29, 9}, {200, 60, 25, 9}, {201, 292, 11, 112}, {81, 221, 111, 23}};
-		int image[][] = readpgm("ex3.pgm");
+		int image[][] = readpgm("ex1.pgm");
 		int itr[][] = interest(image);
 		Graph g;
 		int i = 0;
-	//	while (i < 5) {
+
+		while (i < 25) {
 			g = tograph(itr);
 			HashMap<String, ArrayList<Edge>> map = twograph(g, 0, g.vertices() - 1);
 			chemin = map.get("Chemin1");
 			chemin2 = map.get("Chemin2");
-			//System.out.println("len = " + test[0].length);
-	//		System.out.println(image[0].length);
 			image = supprChemin(image, chemin, chemin2);
-		//	System.out.println(image[0].length);
-			//System.out.println(test[0].length);
+			itr = interest(image);
 			i++;
-			writepgm(image, "TestFinal3");
-			//	System.out.println(System.currentTimeMillis() - debut);
-		//}
+		}
+			System.out.println(System.currentTimeMillis() - debut);
+		writepgm(image, "TestFinal3");
 	}
 }
