@@ -65,30 +65,31 @@ public class SeamCarving {
 		Graph graph = new Graph(n);
 
 		for (int i = 0; i <= largeur; i++) {
-			graph.addEdge(new Edge(0, i, 0));
+			graph.addEdge(new Edge(0, i, 0, false));
 		}
 
 		for (int i = 0; i < hauteur; i++) {
 			for (int j = 0; j < largeur; j++) {
 				if (count + largeur + 1 < n) {
 					if (counthaut > 0 && counthaut % 2 == 1) {
-						graph.addEdge(new Edge(count, count + largeur, 0));
+						graph.addEdge(new Edge(count, count + largeur, 0, true));
 						passe = true;
+
 					} else {
 						if (j != 0 && j != largeur - 1) {
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j]));
-							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j]));
-							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j]));
+							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j], false));
 						} else if (j == 0) {
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j]));
-							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j]));
+							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j], false));
 						} else if (j == largeur - 1) {
-							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j]));
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j]));
+							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
 						}
 					}
 				} else {
-					graph.addEdge(new Edge(count, n - 1, itr[hauteur - 1][j]));
+					graph.addEdge(new Edge(count, n - 1, itr[hauteur - 1][j],false));
 				}
 				count++;
 			}
@@ -98,7 +99,6 @@ public class SeamCarving {
 				passe = false;
 			}
 		}
-		graph.writeFile("test.dot");
 		return graph;
 	}
 
@@ -162,26 +162,67 @@ public class SeamCarving {
 		}
 	}
 
-	public static int[][] supprChemin(int[][] tab, ArrayList<Edge> chemin) {
+	public static int[][] supprChemin(int[][] tab, ArrayList<Edge> chemin, ArrayList<Edge> chemin2) {
 		boolean check = true;
 		int y = 0;
 		int hauteur = tab.length;
 		int largeur = tab[0].length;
-		int[][] newTab = new int[hauteur][largeur - 1];
+		int[][] newTab = new int[hauteur][largeur - 2];
+		int mult = 0;
 		int total = 1;
-		int index = hauteur;
+		int index = 1;
+		boolean change = false;
 
+		ArrayList<Edge> poubellech1 = new ArrayList<Edge>();
+		for (Edge e : chemin) {
+			if (change == true) {
+				e.setFrom(e.from - largeur * mult);
+				e.setTo(e.to - largeur * mult);
+			}
+			if (e.getNewArrete() == true) {
+				change = true;
+				poubellech1.add(e);
+				mult++;
+			}
+		}
+		chemin.removeAll(poubellech1);
+
+		ArrayList<Edge> poubellech2 = new ArrayList<Edge>();
+		change = false;
+		mult = 0;
+		System.out.println("------");
+		Iterator<Edge> it = chemin2.iterator();
+		while (it.hasNext()) {
+			Edge e = it.next();
+			if (change == true) {
+				e.setFrom(e.from - largeur * mult);
+				e.setTo(e.to - largeur * mult);
+			}
+			if (e.getNewArrete() == true) {
+				change = true;
+				poubellech2.add(e);
+				mult++;
+			}
+		}
+		chemin2.removeAll(poubellech2);
+
+
+		System.out.println(tab.length);
 		for (int i = 0; i < hauteur; i++) {
-			index--;
 			y = 0;
 			Edge act = chemin.get(index);
+			Edge act2 = chemin2.get(index);
+			//System.out.println(act.from + " " + act.to);
+			//System.out.println(act.from + " " + act2.from + " " + total + " " + a);
 			for (int j = 0; j < largeur; j++) {
-				if (act.from != total) {
+				if (act.from != total && act2.from != total) {
+					//System.out.println(tab[i][j]);
 					newTab[i][y] = tab[i][j];
 					y++;
 				}
 				total++;
 			}
+			index++;
 		}
 		return newTab;
 	}
@@ -190,59 +231,103 @@ public class SeamCarving {
 		ArrayList<Edge> chemin = djikstra(g, s, t);
 		ArrayList<Edge> temp = new ArrayList<Edge>();
 		ArrayList<Edge> arretes = new ArrayList<Edge>();
-		ArrayList<Edge> arretes1 = new ArrayList<Edge>();
-		//ArrayList cout = new ArrayList();
-		//int cout[] = new int[g.vertices()];
+		int coutSommets[] = new int[g.vertices()];
 		Iterator<Edge> iterator = g.edges().iterator();
 		HashMap<String, ArrayList<Edge>> map = new HashMap<String, ArrayList<Edge>>();
-		HashMap<String, ArrayList<Edge>> cout = new HashMap<String, ArrayList<Edge>>();
 		int res;
 		int resultat[] = new int[g.getEdge() * 2];
-		int iter = 0;
 		int it = 0;
-		int cost = 0;
-		boolean continuer = true;
 		int from;
 		int to;
+		int largeur = 0;
 
-		 while (iterator.hasNext()) {
-		 	Edge e = iterator.next();
+		while (iterator.hasNext()){
+			Edge e = iterator.next();
+			if (e.from == 0){
+				largeur++;
+			}
 			arretes.add(e);
 		}
+		int hauteur = g.vertices() / largeur;
+		int verticies[][] = new int[hauteur][largeur];
 
-		cout[0] = 0;
-		for (int i = 1; i < g.vertices(); i++) {
-			long debut = System.currentTimeMillis();
-			cout[i] = 999;
-			System.out.println(arretes.size());
-			while (iterator.hasNext()){
-				Edge e = iterator.next();
-				if (e.to == i) {
-					//System.out.println(j);
-					res = e.cost + cout[e.from];
-					if (cout[i] > res) {
-						cout[i] = res;
-					}
-				}else {
-					arretes.add(e);
+		int total = 0;
+		for (int i = 0; i < hauteur; i++){
+			for (int j = 0; j < largeur; j++){
+				if (i == 0){
+					coutSommets[j] = 0;
 				}
-				//System.out.println(arretes.remove(e) + "  " + i);
-					//System.out.println(iter);
-				//System.out.println(System.currentTimeMillis() - debut);
+				verticies[i][j] = total;
+				total++;
 			}
-			iterator =  arretes.iterator();
+		}
+
+
+		int nbArrTot = 4;
+		int nbArrAct = 4;
+		int tot = 5;
+		for (int i = 1; i < hauteur; i++) {
+			if (i % 2 == 0 && i + 1 != hauteur) {
+				nbArrAct += 4;
+				nbArrTot = nbArrAct - 4;
+			} else {
+				nbArrAct += 4 + (largeur - 2) * 3;
+				nbArrTot = nbArrAct - (4 + (largeur - 2) * 3);
+			}
+			for (int j = 0; j < largeur; j++) {
+				coutSommets[tot] = 999;
+				if (j == 0) {
+
+					Edge e1 = arretes.get(nbArrTot);
+					Edge e2 = arretes.get(nbArrTot + 4);
+					res = e1.cost + coutSommets[e1.from];
+					int res2 = e2.cost + coutSommets[e2.from];
+					if (res2 < res && e1.to == tot && e2.to == tot){
+						res = res2;
+					}
+					if (coutSommets[tot] > res) {
+						coutSommets[tot] = res;
+					}
+				} else if (j == largeur - 1) {
+					Edge e1 = arretes.get(nbArrAct - 1);
+					Edge e2 = arretes.get(nbArrAct - 4);
+					res = e1.cost + coutSommets[e1.from];
+					int res2 = e2.cost + coutSommets[e2.from];
+					if (res2 < res && e1.to == tot && e2.to == tot){
+						res = res2;
+					}
+					if (coutSommets[tot] > res) {
+						coutSommets[tot] = res;
+					}
+				} else {
+					for (int k = nbArrTot; k < nbArrAct; k++) {
+						Edge e = arretes.get(k);
+						if (e.to == tot) {
+							res = e.cost + coutSommets[e.from];
+							if (coutSommets[tot] > res) {
+								coutSommets[tot] = res;
+							}
+						}
+					}
+				}
+				tot++;
+			}
+		}
+		coutSommets[g.vertices() - 1] = 888;
+		for (int i = nbArrAct; i < arretes.size(); i++){
+			Edge e = arretes.get(i);
+			res = e.cost + coutSommets[e.from];
+			if (coutSommets[g.vertices() - 1] > res) {
+				coutSommets[g.vertices() - 1] = res;
+			}
 		}
 
 		iterator = g.edges().iterator();
 		while (iterator.hasNext()) {
 			Edge edge = iterator.next();
 			temp.add(edge);
-			//System.out.println("Arrete " + edge.from + " - " + edge.to + " Ancien cout = " + edge.cost + " Operation -> " + coutChemin(djikstra(g, 0, edge.from)) + " - " + coutChemin(djikstra(g, 0, edge.to)));
-		//	System.out.println(edge.from);
-			res = edge.cost + cout[edge.from] - cout[edge.to];
-			//res = edge.cost + coutChemin(djikstra(g, 0, edge.from)) - coutChemin(djikstra(g, 0, edge.to));
+			res = edge.cost + coutSommets[edge.from] - coutSommets[edge.to];
 			resultat[it] = res;
-			//System.out.println(resultat[it]);
 			it++;
 		}
 		for (int j = 0; j < temp.size(); j++) {
@@ -263,15 +348,54 @@ public class SeamCarving {
 			edge.setFrom(to);
 			edge.setTo(from);
 		}
+		//System.out.println("ok");
+		boolean change = false;
+		boolean change2 = false;
+
+
+		Comparator<Edge> comparator = Comparator.comparing(Edge::getFrom);
+		Collections.sort(chemin, comparator);
+		Collections.sort(chemin2, comparator);
+
+
+
 		for (int k = 0; k < chemin.size(); k++) {
 			for (int l = 0; l < chemin2.size(); l++) {
 				if (chemin.get(k).equals(chemin2.get(l))) {
+				//	System.out.println(chemin.get(k).from + " " + chemin.get(k).to + " [ " + chemin2.get(l).from + " " +  chemin2.get(l).to);
 					chemin.remove(chemin.get(k));
 					chemin2.remove(chemin2.get(l));
 				}
 			}
 		}
-		g.writeFile("test");
+		for (int i = 0; i < chemin.size(); i++) {
+			for (int j = 0; j < chemin2.size(); j++) {
+				Edge e = chemin.get(i);
+				Edge e2 = chemin2.get(j);
+				if (e.to == e2.from) {
+					chemin.add(e2);
+					chemin2.remove(e2);
+				}
+			}
+		}
+
+		for (int i = 0; i < chemin2.size(); i++) {
+			for (int j = 0; j < chemin.size(); j++) {
+				Edge e = chemin.get(j);
+				Edge e2 = chemin2.get(i);
+				if (e2.to == e.from){
+					chemin2.add(e);
+					chemin.remove(e);
+				//	System.out.println("-----------------" + e.from + " " + e.to);
+				}
+			}
+		}
+		//g.writeFile("test");
+		//Comparator<Edge> comparator = Comparator.comparing(Edge::getFrom);
+		Collections.sort(chemin, comparator);
+		Collections.sort(chemin2, comparator);
+
+
 		map.put("Chemin1", chemin);
 		map.put("Chemin2", chemin2);
 		return map;
@@ -279,38 +403,27 @@ public class SeamCarving {
 	}
 
 	public static void main(String args[]) {
-		//long debut = System.currentTimeMillis();
+		long debut = System.currentTimeMillis();
 		ArrayList<Edge> chemin;
 		ArrayList<Edge> chemin2;
-		int test[][] = { {3, 11, 24, 39},{8, 21, 29, 39}, {200, 60, 25, 0} };
-		//int image[][] = readpgm("ex3.pgm");
-		int itr[][] = interest(test);
-		Graph g = tograph(itr);
-		HashMap<String, ArrayList<Edge>> map = twograph(g, 0, g.vertices() - 1);
-	//	System.out.println(System.currentTimeMillis() - debut);
-		chemin = map.get("Chemin1");
-		chemin2 = map.get("Chemin2");
-		//image = supprChemin(image, chemin);
-		//image = supprChemin(image, chemin2);
-		//writepgm(image, "TestFinal3");
+		int test[][] = {{3, 11, 29, 9}, {8, 21, 29, 9}, {200, 60, 25, 9}, {201, 292, 11, 112}, {81, 221, 111, 23}};
+		int image[][] = readpgm("ex3.pgm");
+		int itr[][] = interest(image);
+		Graph g;
+		int i = 0;
+	//	while (i < 5) {
+			g = tograph(itr);
+			HashMap<String, ArrayList<Edge>> map = twograph(g, 0, g.vertices() - 1);
+			chemin = map.get("Chemin1");
+			chemin2 = map.get("Chemin2");
+			//System.out.println("len = " + test[0].length);
+	//		System.out.println(image[0].length);
+			image = supprChemin(image, chemin, chemin2);
+		//	System.out.println(image[0].length);
+			//System.out.println(test[0].length);
+			i++;
+			writepgm(image, "TestFinal3");
+			//	System.out.println(System.currentTimeMillis() - debut);
+		//}
 	}
 }
-//itr = interest(image);
-//ArrayList<Edge> chemin = djikstra(g, 0, 8);
-//System.out.println(coutChemin(chemin));
-//for (int i = 0; i < chemin.size(); i++){
-//System.out.println(chemin.get(i).cost);
-//}
-//int image[][] = readpgm("ex3.pgm");
-//int itr[][] = interest(image);
-//Graph g;
-/**int i = 0;
- while (i < 50){
- g = tograph(itr);
- chemin = djikstra(g, 0, g.vertices() - 1);
- image = supprChemin(image, chemin);
- itr = interest(image);
- i++;
- }
- }**/
-
