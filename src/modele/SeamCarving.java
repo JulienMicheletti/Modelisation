@@ -190,7 +190,6 @@ public class SeamCarving {
 		ArrayList<Edge> poubellech2 = new ArrayList<Edge>();
 		change = false;
 		mult = 0;
-		System.out.println("------");
 		Iterator<Edge> it = chemin2.iterator();
 		while (it.hasNext()) {
 			Edge e = it.next();
@@ -401,7 +400,7 @@ public class SeamCarving {
 		ArrayList<Edge> chemin;
 		ArrayList<Edge> chemin2;
 		int test[][] = {{3, 11, 29, 9}, {8, 21, 29, 9}, {200, 60, 25, 9}, {201, 292, 11, 112}, {81, 221, 111, 23}};
-		int image[][] = readpgm("ex1.pgm");
+		int image[][] = readpgm("wolf.pgm");
 		int itr[][] = interest(image);
 		Graph g;
 		int i = 0;
@@ -415,7 +414,7 @@ public class SeamCarving {
 			itr = interest(image);
 			i++;
 		}
-			System.out.println(System.currentTimeMillis() - debut);
+			//System.out.println(System.currentTimeMillis() - debut);
 		writepgm(image, "TestFinal3");
 	}
 }
