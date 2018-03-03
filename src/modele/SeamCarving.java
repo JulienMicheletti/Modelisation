@@ -67,7 +67,8 @@ public class SeamCarving {
 		for (int i = 0; i <= largeur; i++) {
 			graph.addEdge(new Edge(0, i, 0, false));
 		}
-
+		int gauche = 0;
+		int droite = 0;
 		for (int i = 0; i < hauteur; i++) {
 			for (int j = 0; j < largeur; j++) {
 				if (count + largeur + 1 < n) {
@@ -77,19 +78,25 @@ public class SeamCarving {
 
 					} else {
 						if (j != 0 && j != largeur - 1) {
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
-							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j], false));
-							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur, Math.abs(Math.abs(itr[i][j + 1]) - Math.abs(itr[i][j - 1])), false));
+							graph.addEdge(new Edge(count, count + largeur + 1, Math.abs(Math.abs(itr[i][j + 1]) - Math.abs(itr[i+1][j])), false));
+							graph.addEdge(new Edge(count, count + largeur - 1, Math.abs(Math.abs(itr[i][j - 1]) - Math.abs(itr[i + 1][j])), false));
 						} else if (j == 0) {
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
-							graph.addEdge(new Edge(count, count + largeur + 1, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur, Math.abs(itr[i][j + 1]), false));
+							graph.addEdge(new Edge(count, count + largeur + 1, Math.abs(Math.abs(itr[i][j + 1]) - Math.abs(itr[i + 1][j])), false));
 						} else if (j == largeur - 1) {
-							graph.addEdge(new Edge(count, count + largeur - 1, itr[i][j], false));
-							graph.addEdge(new Edge(count, count + largeur, itr[i][j], false));
+							graph.addEdge(new Edge(count, count + largeur - 1, Math.abs(Math.abs(itr[i][j - 1]) - Math.abs(itr[i + 1][j])), false));
+							graph.addEdge(new Edge(count, count + largeur, Math.abs(itr[i][j - 1]), false));
 						}
 					}
 				} else {
-					graph.addEdge(new Edge(count, n - 1, itr[hauteur - 1][j],false));
+					if (j != 0 && j != largeur - 1){
+						graph.addEdge(new Edge(count, n - 1, Math.abs(Math.abs(itr[hauteur - 1][j -1]) - Math.abs(itr[hauteur - 1][j+1])),false));
+					}else if (j == 0){
+						graph.addEdge(new Edge(count, n - 1, Math.abs(itr[hauteur - 1][j  + 1]),false));
+					}else if (j == largeur - 1){
+						graph.addEdge(new Edge(count, n - 1, Math.abs(itr[hauteur - 1][j  - 1]),false));
+					}
 				}
 				count++;
 			}
@@ -334,7 +341,9 @@ public class SeamCarving {
 			edge.setFrom(to);
 			edge.setTo(from);
 		}
+
 		ArrayList<Edge> chemin2 = djikstra(g, s, t);
+
 		for (int k = 0; k < chemin.size(); k++) {
 			Edge edge = chemin.get(k);
 			from = edge.from;
@@ -342,21 +351,14 @@ public class SeamCarving {
 			edge.setFrom(to);
 			edge.setTo(from);
 		}
-		//System.out.println("ok");
-		boolean change = false;
-		boolean change2 = false;
-
 
 		Comparator<Edge> comparator = Comparator.comparing(Edge::getFrom);
 		Collections.sort(chemin, comparator);
 		Collections.sort(chemin2, comparator);
 
-
-
 		for (int k = 0; k < chemin.size(); k++) {
 			for (int l = 0; l < chemin2.size(); l++) {
 				if (chemin.get(k).equals(chemin2.get(l))) {
-				//	System.out.println(chemin.get(k).from + " " + chemin.get(k).to + " [ " + chemin2.get(l).from + " " +  chemin2.get(l).to);
 					chemin.remove(chemin.get(k));
 					chemin2.remove(chemin2.get(l));
 				}
@@ -380,11 +382,9 @@ public class SeamCarving {
 				if (e2.to == e.from){
 					chemin2.add(e);
 					chemin.remove(e);
-				//	System.out.println("-----------------" + e.from + " " + e.to);
 				}
 			}
 		}
-		//Comparator<Edge> comparator = Comparator.comparing(Edge::getFrom);
 		Collections.sort(chemin, comparator);
 		Collections.sort(chemin2, comparator);
 
@@ -406,7 +406,7 @@ public class SeamCarving {
 		int i = 0;
 
 		while (i < 25) {
-			g = tograph(itr);
+			g = tograph(image);
 			HashMap<String, ArrayList<Edge>> map = twograph(g, 0, g.vertices() - 1);
 			chemin = map.get("Chemin1");
 			chemin2 = map.get("Chemin2");
@@ -415,6 +415,6 @@ public class SeamCarving {
 			i++;
 		}
 			//System.out.println(System.currentTimeMillis() - debut);
-		writepgm(image, "TestFinal3");
+		writepgm(image, "TestFinal6");
 	}
 }
